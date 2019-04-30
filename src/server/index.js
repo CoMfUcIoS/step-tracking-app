@@ -6,7 +6,6 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import Sequelize from 'sequelize';
 import epilogue from 'epilogue';
-import OktaJwtVerifier from '@okta/jwt-verifier';
 import fetch from 'node-fetch';
 import log from './log';
 
@@ -24,11 +23,6 @@ const {
   REACT_APP_DATABASE_PORT,
   SERVER_PORT,
 } = process.env;
-
-const oktaJwtVerifier = new OktaJwtVerifier({
-  clientId: REACT_APP_OKTA_CLIENT_ID,
-  issuer: `${REACT_APP_OKTA_ORG_URL}`,
-});
 
 const database = new Sequelize(
   REACT_APP_DATABASE_NAME,
@@ -128,8 +122,6 @@ app.use(async (req, res, next) => {
     }
     if (!req.headers.authorization)
       throw new Error('Authorization header is required');
-    // const accessToken = req.headers.authorization.trim().split(' ')[1];
-    // await oktaJwtVerifier.verifyAccessToken(accessToken);
     return next();
   } catch (error) {
     return next(error.message);
@@ -142,7 +134,7 @@ app.route('/stepLeaders').get((req, res) => {
       'SELECT SUM(steps) as total_steps FROM steps; SELECT RANK () OVER(ORDER BY SUM(steps) DESC) as rank, steps.name, charity_name, fundraising_link, SUM(steps) as steps FROM steps LEFT JOIN profiles USING (user_id) GROUP BY steps.name, user_id, charity_name, fundraising_link',
     )
     .then(steps => {
-      let result = {
+      const result = {
         total_steps: steps[0][0].total_steps,
         leaders: steps[0].slice(1),
       };
@@ -206,11 +198,6 @@ stepsResource.delete.fetch.after((req, res, context) => {
 });
 
 stepsResource.delete.fetch(async (req, res, context) => {
-  const accessToken = req.headers.authorization.trim().split(' ')[1];
-  const jwt = await oktaJwtVerifier.verifyAccessToken(accessToken);
-  if (context.instance.dataValues.userId !== jwt.claims.uid) {
-    return context.error(403, 'Not your record!');
-  }
   return context.continue;
 });
 
@@ -220,11 +207,6 @@ stepsResource.update.write.after((req, res, context) => {
 });
 
 stepsResource.update.write(async (req, res, context) => {
-  const accessToken = req.headers.authorization.trim().split(' ')[1];
-  const jwt = await oktaJwtVerifier.verifyAccessToken(accessToken);
-  if (context.instance.dataValues.userId !== jwt.claims.uid) {
-    return context.error(403, 'Not your record!');
-  }
   return context.continue;
 });
 
@@ -234,11 +216,6 @@ stepsResource.create.write.after((req, res, context) => {
 });
 
 stepsResource.create.write(async (req, res, context) => {
-  const accessToken = req.headers.authorization.trim().split(' ')[1];
-  const jwt = await oktaJwtVerifier.verifyAccessToken(accessToken);
-  if (context.instance.dataValues.userId !== jwt.claims.uid) {
-    return context.error(403, 'Not your record!');
-  }
   return context.continue;
 });
 
@@ -253,11 +230,6 @@ profileResource.delete.fetch.after((req, res, context) => {
 });
 
 profileResource.delete.fetch(async (req, res, context) => {
-  const accessToken = req.headers.authorization.trim().split(' ')[1];
-  const jwt = await oktaJwtVerifier.verifyAccessToken(accessToken);
-  if (context.instance.dataValues.userId !== jwt.claims.uid) {
-    return context.error(403, 'Not your record!');
-  }
   return context.continue;
 });
 
@@ -267,11 +239,6 @@ profileResource.update.write.after((req, res, context) => {
 });
 
 profileResource.update.write(async (req, res, context) => {
-  const accessToken = req.headers.authorization.trim().split(' ')[1];
-  const jwt = await oktaJwtVerifier.verifyAccessToken(accessToken);
-  if (context.instance.dataValues.userId !== jwt.claims.uid) {
-    return context.error(403, 'Not your record!');
-  }
   return context.continue;
 });
 
@@ -281,11 +248,6 @@ profileResource.create.write.after((req, res, context) => {
 });
 
 profileResource.create.write(async (req, res, context) => {
-  const accessToken = req.headers.authorization.trim().split(' ')[1];
-  const jwt = await oktaJwtVerifier.verifyAccessToken(accessToken);
-  if (context.instance.dataValues.userId !== jwt.claims.uid) {
-    return context.error(403, 'Not your record!');
-  }
   return context.continue;
 });
 
