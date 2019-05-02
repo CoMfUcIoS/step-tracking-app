@@ -146,7 +146,7 @@ app.route('/stepLeaders').get((req, res) => {
 app.route('/donationLeaders').get((req, res) => {
   database
     .query(
-      `SELECT SUM(total_donations * ${currencyMultiplier}) as total_donations FROM profiles; SELECT RANK () OVER(ORDER BY total_donations * ${currencyMultiplier} DESC) as rank, name, charity_name, fundraising_link, total_donations, currency FROM profiles GROUP BY name, user_id, charity_name, fundraising_link`,
+      `SELECT SUM(total_donations * ${currencyMultiplier}) as total_donations FROM profiles; SELECT RANK () OVER(ORDER BY total_donations * ${currencyMultiplier} DESC) as rank, name, charity_name, fundraising_link, total_donations, currency FROM profiles WHERE total_donations > 0 GROUP BY name, user_id, charity_name, fundraising_link`,
     )
     .then(donors => {
       res.json({
