@@ -96,6 +96,11 @@ class DonationLeaders extends Component {
     const { classes } = this.props;
     const { dashData, loading } = this.state;
     const { totalDonations = 0, leaders, currencyRates } = dashData;
+    const nonZeroLeaders = Array.isArray(leaders)
+      ? leaders.filter(obj => {
+          return obj.total_donations > 0;
+        })
+      : [];
     const { date, rates } = currencyRates || {};
     let currencyDisclaimer = `* currency conversions as of ${date}: USD = 1`;
     if (rates) {
@@ -123,7 +128,7 @@ class DonationLeaders extends Component {
             </Fade>
           </div>
         )}
-        {leaders && leaders.length > 0 ? (
+        {nonZeroLeaders && nonZeroLeaders.length > 0 ? (
           <Paper className={classes.root}>
             <Table className={classes.table}>
               <TableHead>
@@ -155,7 +160,7 @@ class DonationLeaders extends Component {
                   maintainContainerHeight
                   typeName={null}
                 >
-                  {leaders.map(row => (
+                  {nonZeroLeaders.map(row => (
                     <TableRow key={row.name} id={row.name}>
                       <TableCell align="right">{row.rank}</TableCell>
                       <TableCell align="right">{row.name}</TableCell>
